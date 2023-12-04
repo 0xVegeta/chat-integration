@@ -2,8 +2,8 @@ const Host = require("../models/hostModel");
 const ChatRoom = require("../models/chatRoomModel");
 
 const createHost = async (req, res) => {
-  const { name, email, password } = req.body;
-  if (!email || !name || !password) {
+	const { name, email, password } = req.body;
+	if (!email || !name || !password) {
 		res.status(400);
 		throw new Error("Please Enter all the fields");
 	}
@@ -12,8 +12,6 @@ const createHost = async (req, res) => {
 
 	return res.status(201).json(host);
 };
-
-
 
 const getAllHosts = async (req, res) => {
 	try {
@@ -87,22 +85,22 @@ const fetchHost = async (req, res) => {
 	}
 };
 
-const login = asyncHandler(async (req, res) => {
+const login = async (req, res) => {
 	const { email, password } = req.body;
 	const host = await Host.findOne({ email });
 
 	if (host && (await Host.matchPassword(password))) {
 		res.status(200);
 		res.json({
-      email: host.email,
-      name: host.name,
+			email: host.email,
+			name: host.name,
 			token: generateToken(host._id),
 		});
 	} else {
 		res.status(401);
 		throw new Error("Invalid Email or Password");
 	}
-});
+};
 
 module.exports = {
 	createHost,
