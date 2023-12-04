@@ -87,10 +87,28 @@ const fetchHost = async (req, res) => {
 	}
 };
 
+const login = asyncHandler(async (req, res) => {
+	const { email, password } = req.body;
+	const host = await Host.findOne({ email });
+
+	if (host && (await Host.matchPassword(password))) {
+		res.status(200);
+		res.json({
+      email: host.email,
+      name: host.name,
+			token: generateToken(host._id),
+		});
+	} else {
+		res.status(401);
+		throw new Error("Invalid Email or Password");
+	}
+});
+
 module.exports = {
 	createHost,
 	getAllHosts,
 	updateHost,
 	deleteHost,
 	fetchHost,
+	login,
 };

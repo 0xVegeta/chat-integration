@@ -1,10 +1,11 @@
 const express = require("express");
-
-const { createHost, getAllHosts, fetchHost } = require("../controllers/hosts");
+const {protect} = require('../middlewares/authentication')
+const { createHost, getAllHosts, fetchHost, login } = require("../controllers/hosts");
 const hostRouter = express.Router();
 
 hostRouter.route("/").post(createHost).get(getAllHosts);
-hostRouter.route("/:hostId").get(fetchHost)
+hostRouter.get("/:hostId", protect, fetchHost)
+hostRouter.post('/login', login)
 
 	// .patch(hostControllers.updateHost)
 	// .delete(hostControllers.deleteHost);
