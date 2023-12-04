@@ -14,7 +14,7 @@ app.use(bodyParser.json());
 // app.get('/hey', (req, res) => {
 //   res.json({"message":"wow"})
 // })
-console.log('check here', apiRouters);
+// console.log('check here', apiRouters);
 app.use("/", apiRouters);
 
 
