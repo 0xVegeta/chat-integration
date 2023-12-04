@@ -18,11 +18,12 @@ const createChatRoom = async (req, res) => {
 const fetchChatRoom = async (req, res) => {
   try {
 		const chatRoomId = req.params.id;
-		const chatRoom = await ChatRoom.find({ _id: chatRoomId });
+    const chatRoom = await ChatRoom.find({ _id: chatRoomId });
+    const chats = await Chat.find({chatRoom})
 		if (!chatRoomId) {
 			return res.status(404).json({ error: "Invalid chatRoom ID" });
 		}
-		return res.status(200).json({ chatRoom });
+		return res.status(200).json({ chatRoom, chats });
   } catch (error) {
 		console.error(error.stack);
 		return res.status(500).json({ error: "Error fetching the chatRoom" });
