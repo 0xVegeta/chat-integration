@@ -12,8 +12,12 @@ const logUser = async (req, res) => {
 
 	const userExists = await User.findOne({ email });
   if (userExists) {
-    const chats = await Chat.find({ sessionId })
-    return res.status(200).json({user: userExists,sessiodId: sessionId ? sessionId : uuid(), chats});
+    const chats = sessionId ? await Chat.find({ sessionId }) : []
+    let lastMessage
+    if (!sessionId) {
+      lastMessage = await Chat.findOne({ sender: { id: sender, type: "User" } })
+    }
+    return res.status(200).json({user: userExists, sessiondId: sessionId ? sessionId : uuid(), chats, chatRoom: lastMessage.chatRoom});
   }
 	const user = new User({ name, email });
 	await user.save();
