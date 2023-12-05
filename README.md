@@ -45,7 +45,7 @@ npm run dev (open localhost:3000)
 
 
 
-## API Reference
+## Server API Reference
 
 `/chats`
 
@@ -68,5 +68,28 @@ npm run dev (open localhost:3000)
 | REQUEST METHODS | ENDPOINTS | DESCRIPTION |
 | :-------------- | :-------: | ------------------: |
 | POST | /log | Create a user if not created (if user exists send all related info) |
+
+## Client API Reference
+
+`/signup`
+- Lets hosts create their account
+  
+`/login`
+- Lets hosts log in
+  
+`/host`
+- UI displaying the chat interface and chat history of hosts
+  
+`/embed-chat`
+- an example of the widget placed inside a webpage
+  
+`/admin`
+- displays all the hosts present in the system
+
+## Ports
+
+ Default client port: 3000
+ 
+ Default server port: 5000
 
 
