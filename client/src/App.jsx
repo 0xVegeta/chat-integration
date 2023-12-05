@@ -13,7 +13,7 @@ function App() {
 				<Routes>
 					<Route path="/chat-embed" element={<DemoPage />} />
 					<Route path="/login" element={<LoginPage />} />
-					<Route path="/signup" element={<SignupPage />} />
+					<Route path="/signup" element={<SignupPage />} /> 
 					<Route path="/host" element={<HostChatPage />} />
 					<Route path="/admin" element={<AdminPage />} />
 				</Routes>

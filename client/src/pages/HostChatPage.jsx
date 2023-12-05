@@ -84,7 +84,7 @@ function HostChatPage() {
 		setHost(hostInfo);
 
 		if (!hostInfo) {
-			navigate("/signup");
+			navigate("/login");
 		}
 		getHostDetail(hostInfo._id, hostInfo.token);
 	}, []);

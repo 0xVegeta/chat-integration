@@ -2,11 +2,12 @@ import { useNavigate } from "react-router-dom";
 
 function Navbar() {
 	const navigate = useNavigate();
+	const hostInfo = JSON.parse(localStorage.getItem("hostInfo"));
 	return (
 		<div className="navbar bg-base-100">
 			<div className="flex-1">
-				<a className="btn btn-ghost text-3xl font-extrabold tracking-tighter">
-					DASHBOARD
+				<a className="btn btn-ghost text-3xl font-extrabold tracking-tighter uppercase">
+					{hostInfo.name}'s Dashboard
 				</a>
 			</div>
 			<div className="flex-none gap-2">

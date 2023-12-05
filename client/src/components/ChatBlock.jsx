@@ -123,6 +123,7 @@ function ChatBlock({ openChat }) {
 				setUserDetails(data);
 
 				if (!sessionId) createRoom(data);
+				if (data) console.log("session ID: ", data.sessionId);
 				if (data.sessionId) sessionStorage.setItem("sessionId", data.sessionId);
 			} catch (error) {
 				console.log(error);
@@ -131,9 +132,7 @@ function ChatBlock({ openChat }) {
 			return;
 		}
 
-		const RoomId = roomDetails
-			? roomDetails._id
-			: userDetails.chats[0].chatRoom;
+		const RoomId = roomDetails ? roomDetails._id : userDetails.chatRoom._id;
 
 		newSocket.emit("join", RoomId);
 
@@ -143,7 +142,7 @@ function ChatBlock({ openChat }) {
 			};
 			const body = {
 				sessionId: sessionId,
-				chatRoom: roomDetails ? roomDetails._id : userDetails.chats[0].chatRoom,
+				chatRoom: roomDetails ? roomDetails._id : RoomId,
 				sender: userDetails.user._id,
 				message: message,
 				isHost: false,
@@ -261,7 +260,7 @@ function ChatBlock({ openChat }) {
 							isSender={item.sender.type === "User"}
 							message={item.message}
 							time={item.createdAt}
-							sender={name}
+							sender={item.sender.type === "User" ? name : "Host"}
 						/>
 					))
 				)}

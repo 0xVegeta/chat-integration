@@ -7,8 +7,7 @@ const { generateToken } = require("../config/utility");
 const createHost = async (req, res) => {
 	const { name, email, password } = req.body;
 	if (!email || !name || !password) {
-		res.status(400);
-		throw new Error("Please Enter all the fields");
+    res.status(400).json({ "errorMsg":"Please Enter all the fields"});
 	}
 	const host = new Host({ name, email, password });
 	await host.save();
@@ -41,7 +40,7 @@ const updateHost = async (req, res) => {
 		if (!host) {
 			return res.status(404).json({ error: "host not found" });
 		}
-
+ 
 		return res.status(200).json({ ...host, token: generateToken(host._id) });
 	} catch (error) {
 		console.error(error);
@@ -107,8 +106,7 @@ const login = async (req, res) => {
 			token: generateToken(host._id),
 		});
 	} else {
-		res.status(401);
-		throw new Error("Invalid Email or Password");
+    res.status(401).json({"errorMsg": "Invalid Email or Password"});
 	}
 };
 

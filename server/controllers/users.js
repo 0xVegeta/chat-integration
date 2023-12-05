@@ -20,16 +20,17 @@ const logUser = async (req, res) => {
     const chats = sessionId ? await Chat.find({ sessionId }) : []
     console.log(chats);
     let chatRoom
-    if (!sessionId) {
-      chatRoom = await ChatRoom.findOne({user: userExists._id});
-    }
 
-    return res.status(200).json({user: userExists, sessiondId: sessionId ? sessionId : uuid(), chats, chatRoom});
+    chatRoom = await ChatRoom.findOne({user: userExists._id});
+    console.log(chatRoom);
+
+    return res.status(200).json({user: userExists, sessionId: sessionId ? sessionId : uuid(), chats, chatRoom});
   }
   const user = new User({ name, email });
   await user.save();
-  console.log('check here user', user);
-	return res.status(201).json({ user: user, sessiondId: uuid() })
+  
+  console.log('check here user', user); 
+	return res.status(201).json({ user: user, sessionId: uuid() })
 
 };
 
