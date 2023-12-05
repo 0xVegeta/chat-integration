@@ -8,8 +8,8 @@ import axios from "axios";
 import { io } from "socket.io-client";
 import { ChatState } from "../context/ChatProvider";
 
+var newSocket;
 function HostChatPage () {
-
   const ENDPOINT = "http://localhost:5000";
   // const [socket, setSocket] = useState(null);
   const [loading, setLoading] = useState( true );
@@ -19,27 +19,42 @@ function HostChatPage () {
 
   const { selectedChat, setSelectedChat, host, setHost } = ChatState();
   const [chatDetails, setChatDetails] = useState();
+  const [lastChat, setLastChat] = useState();
 
+  const handleLastChatChange = ( newChat ) => {
+    setLastChat( newChat );
+  };
 
+  const handleHistoryChange = ( newChatHistory ) => {
+    setMessages( () => newChatHistory );
+  };
 
   const navigate = useNavigate();
 
-
   useEffect( () => {
-    const newSocket = io( ENDPOINT );
+    if ( selectedChat ) {
+      newSocket = io( ENDPOINT );
 
-    newSocket.emit( "setup", "yeaa" );
-    newSocket.on( "connected", ( message ) => {
-      console.log( message );
-    } );
+      newSocket.emit( "setup", "yeaa" );
+      newSocket.on( "connected", ( message ) => {
+        console.log( message );
+      } );
 
+      newSocket.emit( "join", selectedChat._id );
 
-    return () => {
-      newSocket.disconnect();
+      newSocket.on( "message", ( message ) => {
+        console.log( "we got a message", message );
+        setMessages( prevMessages => [...prevMessages, message] );
 
-    };
-  }, [ENDPOINT] );
-  const sessionId = JSON.parse( localStorage.getItem( "sessionId" ) );
+      } );
+
+      return () => {
+        newSocket.disconnect();
+      };
+    }
+
+  }, [selectedChat] );
+
   const getHostDetail = async ( id ) => {
     setLoading( true );
 
@@ -56,15 +71,14 @@ function HostChatPage () {
       console.log( data );
       setChatDetails( data );
 
-
-
-
       setLoading( false );
     } catch ( error ) {
       console.error( error );
       setLoading( false );
     }
   };
+
+
 
   useEffect( () => {
     const hostInfo = JSON.parse( localStorage.getItem( "hostInfo" ) );
@@ -76,12 +90,7 @@ function HostChatPage () {
     getHostDetail( hostInfo._id );
 
 
-
-
   }, [] );
-
-
-
 
   if ( loading )
     return <span className="loading loading-ring loading-lg"></span>;
@@ -92,37 +101,63 @@ function HostChatPage () {
       const config = {
         "Content-Type": "application/json",
       };
-      const body = { sessionId: sessionId, chatRoom: selectedChat._id, sender: host._id, message: message, isHost: true };
-      const { data } = await axios.post( "http://localhost:5000/chats/create", body, config );
+      const body = {
+        sessionId: lastChat.sessionId,
+        chatRoom: selectedChat._id,
+        sender: host._id,
+        message: message,
+        isHost: true,
+      };
+      const { data } = await axios.post(
+        "http://localhost:5000/chats/create",
+        body,
+        config
+      );
       console.log( data );
+      newSocket.emit( "message", data );
+      setMessages( [...messages, data] );
       setMessage( "" );
     } catch ( error ) {
       console.log( error );
     }
   };
 
+
   return (
     <div className="w-screen h-screen flex">
-      <div>
-        {chatDetails && <Sidebar chatDetails={chatDetails} />}
-
-
-      </div>
+      <div>{chatDetails && <Sidebar chatDetails={chatDetails} />}</div>
       <div className="w-4/5  flex flex-col">
         <Navbar />
-        <div className="w-full h-full rounded-md bg-gray-100 m-4 p-6 flex flex-col justify-between">
-          {!selectedChat ? <h1 className="text-center">Select a chat to start messaging</h1> : <Chat messages={selectedChat} />}
-
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Type a new message"
-              className="input input-bordered w-full "
-              value={message}
-              onChange={( e ) => setMessage( e.target.value )}
+        <div className="w-full h-full rounded-md bg-gray-100 m-4 p-6 flex flex-col justify-between overflow-auto">
+          {!selectedChat ? (
+            <h1 className="text-center">
+              Select a chat to start messaging
+            </h1>
+          ) : (
+            <Chat
+              messages={selectedChat}
+              onLastChatChange={handleLastChatChange}
+              onHistoryChange={handleHistoryChange}
+              chatHistory={messages}
             />
-            <PaperAirplaneIcon className="w-8 h-8 absolute top-1/2 right-4 transform -translate-y-1/2 border-box text-gray-400 pr-2" onClick={sendMessageHandler} />
-          </div>
+          )}
+        </div>
+        <div className="relative ml-4 mb-4">
+          <input
+            type="text"
+            placeholder="Type a new message"
+            className="input input-bordered w-full "
+            value={message}
+            onChange={( e ) => setMessage( e.target.value )}
+            onKeyDown={( e ) => {
+              if ( e.key === "Enter" )
+                sendMessageHandler( e );
+            }}
+          />
+          <PaperAirplaneIcon
+            className=" w-8 h-8 absolute top-1/2 right-4 transform -translate-y-1/2 border-box text-gray-400 pr-2"
+            onClick={sendMessageHandler}
+          />
         </div>
       </div>
     </div>

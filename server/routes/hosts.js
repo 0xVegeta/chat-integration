@@ -4,7 +4,7 @@ const { createHost, getAllHosts, fetchHost, login } = require("../controllers/ho
 const hostRouter = express.Router();
 
 hostRouter.route("/").post(createHost).get(getAllHosts);
-hostRouter.get("/:hostId", protect, fetchHost)
+hostRouter.get("/:id", protect, fetchHost)
 hostRouter.post('/login', login)
 
 	// .patch(hostControllers.updateHost)

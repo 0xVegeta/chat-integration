@@ -1,5 +1,6 @@
 const Host = require("../models/hostModel");
 const ChatRoom = require("../models/chatRoomModel");
+const Chat = require("../models/chatModel");
 
 const createHost = async (req, res) => {
 	const { name, email, password } = req.body;
@@ -70,15 +71,23 @@ const deleteHost = async (req, res) => {
 
 const fetchHost = async (req, res) => {
 	try {
-		const { hostId } = req.params;
+		const hostId = req.params.id;
 		const host = await Host.find({ _id: hostId });
 		const chatRooms = await ChatRoom.find();
 
 		if (!hostId) {
 			return res.status(404).json({ error: "Invalid host ID" });
 		}
-
-		return res.status(200).json({ host, chatRooms });
+    for (const chatRoom of chatRooms) {
+      chatRoom.user = await User.findById(chatRoom.user)
+      const lastMessage = await Chat.findOne({
+				sender: { id: chatRoom.user, type: "User" },
+      });
+      chatRoom.lastMessage = lastMessage
+      
+    }
+    return res.status(200).json({ host, chatRooms });
+    
 	} catch (error) {
 		console.error(error);
 		return res.status(500).json({ error: "Error fetching the host" });

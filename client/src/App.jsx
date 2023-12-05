@@ -5,16 +5,19 @@ import SignupPage from "./pages/SignupPage";
 import HostChatPage from "./pages/HostChatPage";
 import ChatProvider from "./context/ChatProvider";
 
-function App() {
+
+function App () {
 	return (
 		<Router>
 			<ChatProvider>
+
 				<Routes>
 					<Route path="/" element={<DemoPage />} />
 					<Route path="/login" element={<LoginPage />} />
 					<Route path="/signup" element={<SignupPage />} />
 					<Route path="/host" element={<HostChatPage />} />
 				</Routes>
+
 			</ChatProvider>
 		</Router>
 	);

@@ -10,11 +10,11 @@ function Sidebar ( { chatDetails } ) {
   };
 
   if ( chatDetails ) {
-    console.log( chatDetails );
-    const unreadChats = chatDetails.chatRooms.filter( ( chat ) => chat.status == "idle" );
-    const readChats = chatDetails.chatRooms.filter( ( chat ) => chat.status !== "idle" );
-    console.log( unreadChats );
-    console.log( readChats );
+    console.log( "Rooms: ", chatDetails );
+    // const unreadChats = chatDetails.chatRooms.filter( ( chat ) => chat.status == "idle" );
+    // const readChats = chatDetails.chatRooms.filter( ( chat ) => chat.status !== "idle" );
+    // console.log( unreadChats );
+    // console.log( readChats );
   }
 
 
