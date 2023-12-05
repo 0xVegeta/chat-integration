@@ -1,4 +1,7 @@
+import { useNavigate } from "react-router-dom";
+
 function Navbar() {
+	const navigate = useNavigate();
 	return (
 		<div className="navbar bg-base-100">
 			<div className="flex-1">
@@ -15,10 +18,7 @@ function Navbar() {
 					/>
 				</div>
 				<div className="dropdown dropdown-end">
-					<label
-						tabIndex={0}
-						className="btn btn-ghost btn-circle avatar"
-					>
+					<label tabIndex={0} className="btn btn-ghost btn-circle avatar">
 						<div className="w-10 rounded-full">
 							<img
 								alt="Tailwind CSS Navbar component"
@@ -39,7 +39,12 @@ function Navbar() {
 						<li>
 							<a>Settings</a>
 						</li>
-						<li>
+						<li
+							onClick={() => {
+								localStorage.removeItem("hostInfo");
+								navigate("/login");
+							}}
+						>
 							<a>Logout</a>
 						</li>
 					</ul>

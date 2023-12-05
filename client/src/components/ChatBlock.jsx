@@ -7,26 +7,21 @@ import { v4 as uuid } from "uuid";
 
 import { io } from "socket.io-client";
 var newSocket;
-function ChatBlock ( { openChat } ) {
+function ChatBlock({ openChat }) {
 	const [history, setHistory] = useState();
-	const [loading, setLoading] = useState( false );
-	const [message, setMessage] = useState( "" );
-	const [name, setName] = useState( null );
-	const [email, setEmail] = useState( null );
+	const [loading, setLoading] = useState(false);
+	const [message, setMessage] = useState("");
+	const [name, setName] = useState(null);
+	const [email, setEmail] = useState(null);
 	const [userDetails, setUserDetails] = useState();
 	const [roomDetails, setRoomDetails] = useState();
 
-
-
-
 	const ENDPOINT = "http://localhost:5000";
-	const sessionId = sessionStorage.getItem( "sessionId" );
-
-
+	const sessionId = sessionStorage.getItem("sessionId");
 
 	const getChatHistory = async () => {
 		try {
-			setLoading( true );
+			setLoading(true);
 
 			const config = {
 				headers: {
@@ -36,7 +31,7 @@ function ChatBlock ( { openChat } ) {
 			const body = {
 				name: name,
 				email: email,
-				sessionId: sessionId,
+				sessionId: sessionId === "undefined" ? undefined : sessionId,
 			};
 
 			const { data } = await axios.post(
@@ -44,109 +39,103 @@ function ChatBlock ( { openChat } ) {
 				body,
 				config
 			);
-			console.log( "History", data.chats );
-			setHistory( data.chats );
-			setLoading( false );
-		} catch ( error ) {
-			console.log( error );
-			setLoading( false );
+			console.log("History", data.chats);
+			setHistory(data.chats);
+			setLoading(false);
+		} catch (error) {
+			console.log(error);
+			setLoading(false);
 		}
 	};
-	useEffect( () => {
-		if ( name && email )
-			getChatHistory();
+	useEffect(() => {
+		if (name && email) getChatHistory();
 
 		return () => {
-			setHistory( [] );
+			setHistory([]);
 		};
-	}, [name, email] );
+	}, [name, email]);
 
-	const createRoom = async ( userDetails ) => {
+	const createRoom = async (userDetails) => {
 		try {
 			const config = {
 				"Content-Type": "application/json",
 			};
-			console.log( "first", userDetails );
+			console.log("first", userDetails);
 
 			const { data } = await axios.post(
 				"http://localhost:5000/chats/room",
 				{
-					"userId": userDetails.user._id,
-
+					userId: userDetails.user._id,
 				},
 				config
 			);
-			console.log( "Room Details:", data );
-			setRoomDetails( data );
-		} catch ( error ) {
-			console.log( error );
+			console.log("Room Details:", data);
+			setRoomDetails(data);
+		} catch (error) {
+			console.log(error);
 		}
 	};
 
-	useEffect( () => {
-		newSocket = io( ENDPOINT );
+	useEffect(() => {
+		newSocket = io(ENDPOINT);
 
-		newSocket.emit( "setup", "yeaa" );
-		newSocket.on( "connected", ( message ) => {
-			console.log( message );
-		} );
+		newSocket.emit("setup", "yeaa");
+		newSocket.on("connected", (message) => {
+			console.log(message);
+		});
 
-		newSocket.on( "message", ( message ) => {
-			console.log( "we got it", message );
-			setHistory( prev => [...prev, message] );
-		} );
+		newSocket.on("message", (message) => {
+			console.log("we got it", message);
+			setHistory((prev) => [...prev, message]);
+		});
 
 		return () => {
 			newSocket.disconnect();
 		};
-	}, [] );
+	}, []);
 
-
-	const sendMessageHandler = async ( e ) => {
+	const sendMessageHandler = async (e) => {
 		e.preventDefault();
 
-		if ( !name && !email ) {
-			setName( message );
-			setMessage( "" );
+		if (!name && !email) {
+			setName(message);
+			setMessage("");
 			return;
-		} else if ( !email ) {
-			setEmail( message );
-			setMessage( "" );
+		} else if (!email) {
+			setEmail(message);
+			setMessage("");
 
 			try {
 				const config = {
 					"Content-Type": "application/json",
 				};
-
 				const { data } = await axios.post(
 					"http://localhost:5000/users/log",
 					{
-						"name": name,
-						"email": message,
-						"sessionId": sessionId
+						name: name,
+						email: message,
+						sessionId: sessionId === "undefined" ? undefined : sessionId,
 					},
 					config
 				);
-				console.log( data );
+				console.log("User Details: ", data);
 
-				setUserDetails( data );
+				setUserDetails(data);
 
-				if ( !sessionId )
-					createRoom( data );
-				sessionStorage.setItem( "sessionId", data.sessionId );
-			} catch ( error ) {
-				console.log( error );
+				if (!sessionId) createRoom(data);
+				if (data.sessionId) sessionStorage.setItem("sessionId", data.sessionId);
+			} catch (error) {
+				console.log(error);
 			}
-
 
 			return;
 		}
 
-		const RoomId = roomDetails ? roomDetails._id : userDetails.chats[0].chatRoom;
+		const RoomId = roomDetails
+			? roomDetails._id
+			: userDetails.chats[0].chatRoom;
 
-		newSocket.emit( "join", RoomId );
-
-
+		newSocket.emit("join", RoomId);
 
 		try {
 			const config = {
@@ -164,13 +153,13 @@ function ChatBlock ( { openChat } ) {
 				body,
 				config
 			);
-			newSocket.emit( "message", data );
-			console.log( data );
-			setHistory( [...history, data] );
+			newSocket.emit("message", data);
+			console.log(data);
+			setHistory([...history, data]);
 
-			setMessage( "" );
-		} catch ( error ) {
-			console.log( error );
+			setMessage("");
+		} catch (error) {
+			console.log(error);
 		}
 	};
 	return (
@@ -179,7 +168,7 @@ function ChatBlock ( { openChat } ) {
 				<div className="font-medium">Chat</div>
 				<XMarkIcon
 					className="h-4 w-4 m-1 cursor-pointer"
-					onClick={() => openChat( false )}
+					onClick={() => openChat(false)}
 				/>
 			</div>
 			<div className="grow overflow-y-auto">
@@ -208,7 +197,7 @@ function ChatBlock ( { openChat } ) {
 							isSender={true}
 							message={name}
 							time={Date.now()}
-							sender={"User"}
+							sender={name}
 						/>
 					</>
 				) : (
@@ -241,7 +230,7 @@ function ChatBlock ( { openChat } ) {
 							isSender={true}
 							message={name}
 							time={Date.now()}
-							sender={"User"}
+							sender={name}
 						/>
 						<ChatBubble
 							key={uuid()}
@@ -255,16 +244,27 @@ function ChatBlock ( { openChat } ) {
 							isSender={true}
 							message={email}
 							time={Date.now()}
-							sender={"User"}
+							sender={name}
 						/>
 					</>
 				) : (
 					<></>
 				)}
 
-				{
-					loading ? ( <div>Loading...</div> ) : ( history && history.map( item => <ChatBubble key={item._id} isSender={item.sender.type === "User"} message={item.message} time={item.createdAt} sender={item.sender.type} /> ) )
-				}
+				{loading ? (
+					<div>Loading...</div>
+				) : (
+					history &&
+					history.map((item) => (
+						<ChatBubble
+							key={item._id}
+							isSender={item.sender.type === "User"}
+							message={item.message}
+							time={item.createdAt}
+							sender={name}
+						/>
+					))
+				)}
 			</div>
 			<div className="flex justify-between  border-t border-gray-300">
 				<input
@@ -272,10 +272,9 @@ function ChatBlock ( { openChat } ) {
 					className="grow py-1 px-3 text-sm focus:outline-none rounded-md outline-none border-none focus:border-none ring-0 focus:ring-0 "
 					placeholder="Type a new message..."
 					value={message}
-					onChange={( e ) => setMessage( e.target.value )}
-					onKeyDown={( e ) => {
-						if ( e.key === "Enter" )
-							sendMessageHandler( e );
+					onChange={(e) => setMessage(e.target.value)}
+					onKeyDown={(e) => {
+						if (e.key === "Enter") sendMessageHandler(e);
 					}}
 				/>
 				<div

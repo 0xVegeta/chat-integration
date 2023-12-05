@@ -1,27 +1,36 @@
 const User = require("../models/userModel");
 const Chat = require("../models/chatModel");
-
+const ChatRoom = require("../models/chatRoomModel");
 const { v4: uuid } = require("uuid");
 
 const logUser = async (req, res) => {
+  console.log(111);
   const { name, email, sessionId } = req.body;
+
 	if (!email || !name) {
 		res.status(400);
 		throw new Error("Please Enter all the fields");
 	}
 
-	const userExists = await User.findOne({ email });
+  const userExists = await User.findOne({ email });
+  console.log(113, userExists, typeof sessionId, sessionId);
+  
   if (userExists) {
+    const check = sessionId ? "1":"0"
     const chats = sessionId ? await Chat.find({ sessionId }) : []
-    let lastMessage
+    console.log(chats);
+    let chatRoom
     if (!sessionId) {
-      lastMessage = await Chat.findOne({ sender: { id: sender, type: "User" } })
+      chatRoom = await ChatRoom.findOne({user: userExists._id});
     }
-    return res.status(200).json({user: userExists, sessiondId: sessionId ? sessionId : uuid(), chats, chatRoom: lastMessage.chatRoom});
+
+    return res.status(200).json({user: userExists, sessiondId: sessionId ? sessionId : uuid(), chats, chatRoom});
   }
-	const user = new User({ name, email });
-	await user.save();
-	return res.status(201).json({ user: user, sessiondId: uuid() });
+  const user = new User({ name, email });
+  await user.save();
+  console.log('check here user', user);
+	return res.status(201).json({ user: user, sessiondId: uuid() })
+
 };
 
 module.exports = {

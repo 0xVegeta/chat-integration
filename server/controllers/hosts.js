@@ -1,6 +1,8 @@
 const Host = require("../models/hostModel");
 const ChatRoom = require("../models/chatRoomModel");
 const Chat = require("../models/chatModel");
+const User = require("../models/userModel");
+const { generateToken } = require("../config/utility");
 
 const createHost = async (req, res) => {
 	const { name, email, password } = req.body;
@@ -40,7 +42,7 @@ const updateHost = async (req, res) => {
 			return res.status(404).json({ error: "host not found" });
 		}
 
-		return res.status(200).json({ host });
+		return res.status(200).json({ ...host, token: generateToken(host._id) });
 	} catch (error) {
 		console.error(error);
 		return res.status(500).json({ error: "Error updating the host" });
@@ -78,16 +80,14 @@ const fetchHost = async (req, res) => {
 		if (!hostId) {
 			return res.status(404).json({ error: "Invalid host ID" });
 		}
-    for (const chatRoom of chatRooms) {
-      chatRoom.user = await User.findById(chatRoom.user)
-      const lastMessage = await Chat.findOne({
-				sender: { id: chatRoom.user, type: "User" },
-      });
-      chatRoom.lastMessage = lastMessage
-      
-    }
-    return res.status(200).json({ host, chatRooms });
-    
+		for (const chatRoom of chatRooms) {
+			chatRoom.user = await User.findById(chatRoom.user);
+			// const lastMessage = await Chat.findOne({
+			// 	sender: { id: chatRoom.user, type: "User" },
+			// });
+			// chatRoom.lastMessage = lastMessage
+		}
+		return res.status(200).json({ host, chatRooms });
 	} catch (error) {
 		console.error(error);
 		return res.status(500).json({ error: "Error fetching the host" });
@@ -98,9 +98,10 @@ const login = async (req, res) => {
 	const { email, password } = req.body;
 	const host = await Host.findOne({ email });
 
-	if (host && (await Host.matchPassword(password))) {
+	if (host && (await host.matchPassword(password))) {
 		res.status(200);
 		res.json({
+			_id: host._id,
 			email: host.email,
 			name: host.name,
 			token: generateToken(host._id),

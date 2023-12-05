@@ -1,9 +1,32 @@
 import { UserCircleIcon } from "@heroicons/react/24/solid";
+import axios from "axios";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 function LoginPage() {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
+	const navigate = useNavigate();
+
+	const loginHandler = async (e) => {
+		e.preventDefault();
+		try {
+			const config = {
+				headers: {
+					"Content-Type": "application/json",
+				},
+			};
+			const { data } = await axios.post(
+				"http://localhost:5000/hosts/login",
+				{ email, password },
+				config
+			);
+			console.log(data);
+			localStorage.setItem("hostInfo", JSON.stringify(data));
+			navigate("/host");
+		} catch (error) {
+			console.log(error);
+		}
+	};
 	return (
 		<div className="h-screen w-screen">
 			<div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
@@ -32,6 +55,8 @@ function LoginPage() {
 									name="email"
 									type="email"
 									autoComplete="email"
+									value={email}
+									onChange={(e) => setEmail(e.target.value)}
 									required
 									className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-black sm:text-sm sm:leading-6"
 								/>
@@ -61,6 +86,8 @@ function LoginPage() {
 									name="password"
 									type="password"
 									autoComplete="current-password"
+									value={password}
+									onChange={(e) => setPassword(e.target.value)}
 									required
 									className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-black sm:text-sm sm:leading-6"
 								/>
@@ -71,6 +98,7 @@ function LoginPage() {
 							<button
 								type="submit"
 								className="flex w-full justify-center rounded-md bg-black px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-gray-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+								onClick={loginHandler}
 							>
 								Sign in
 							</button>

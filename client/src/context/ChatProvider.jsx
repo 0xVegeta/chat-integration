@@ -16,9 +16,9 @@ const ChatProvider = ( { children } ) => {
     setHost( hostInfo );
     // console.log( host );
 
-    if ( !hostInfo ) {
-      navigate( "/signup" );
-    }
+    // if ( !hostInfo ) {
+    //   navigate( "/signup" );
+    // }
   }, [navigate] );
 
   return (
