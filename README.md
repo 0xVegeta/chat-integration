@@ -69,7 +69,7 @@ npm run dev (open localhost:3000)
 | :-------------- | :-------: | ------------------: |
 | POST | /log | Create a user if not created (if user exists send all related info) |
 
-## Client API Reference
+## Client Route Endpoint Reference
 
 `/signup`
 - Lets hosts create their account

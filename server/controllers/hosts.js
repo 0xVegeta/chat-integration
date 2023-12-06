@@ -5,14 +5,19 @@ const User = require("../models/userModel");
 const { generateToken } = require("../config/utility");
 
 const createHost = async (req, res) => {
-	const { name, email, password } = req.body;
-	if (!email || !name || !password) {
-    res.status(400).json({ "errorMsg":"Please Enter all the fields"});
-	}
-	const host = new Host({ name, email, password });
-	await host.save();
+  try {
+    const { name, email, password } = req.body;
+		if (!email || !name || !password) {
+			res.status(400).json({ errorMsg: "Please Enter all the fields" });
+		}
+		const host = new Host({ name, email, password });
+		await host.save();
 
-	return res.status(201).json(host);
+		return res.status(201).json(host);
+    
+  } catch (e) {
+    return res.status(500).json({ errorMsg: `Error while creating host => ${e}` });
+  }
 };
 
 const getAllHosts = async (req, res) => {
@@ -20,7 +25,7 @@ const getAllHosts = async (req, res) => {
 		const hosts = await Host.find();
 		res.status(200).json({ hosts });
 	} catch (error) {
-		res.status(500).json({ error: "Internal Server Error" });
+		res.status(500).json({ error: `Error while fetching hosts, => ${error}` });
 	}
 };
 
@@ -81,33 +86,34 @@ const fetchHost = async (req, res) => {
 		}
 		for (const chatRoom of chatRooms) {
 			chatRoom.user = await User.findById(chatRoom.user);
-			// const lastMessage = await Chat.findOne({
-			// 	sender: { id: chatRoom.user, type: "User" },
-			// });
-			// chatRoom.lastMessage = lastMessage
 		}
 		return res.status(200).json({ host, chatRooms });
 	} catch (error) {
 		console.error(error);
-		return res.status(500).json({ error: "Error fetching the host" });
+		return res.status(500).json({ error: `Error fetching the host, => ${error}` });
 	}
 };
 
 const login = async (req, res) => {
-	const { email, password } = req.body;
-	const host = await Host.findOne({ email });
+  try {
+    const { email, password } = req.body;
+		const host = await Host.findOne({ email });
 
-	if (host && (await host.matchPassword(password))) {
-		res.status(200);
-		res.json({
-			_id: host._id,
-			email: host.email,
-			name: host.name,
-			token: generateToken(host._id),
-		});
-	} else {
-    res.status(401).json({"errorMsg": "Invalid Email or Password"});
-	}
+		if (host && (await host.matchPassword(password))) {
+			res.status(200);
+			res.json({
+				_id: host._id,
+				email: host.email,
+				name: host.name,
+				token: generateToken(host._id),
+			});
+		} else {
+			res.status(401).json({ errorMsg: "Invalid Email or Password" });
+		}
+    
+  } catch (e) {
+			res.status(500).json({ errorMsg: `Error while logging host, => ${e}` });
+  }
 };
 
 module.exports = {
